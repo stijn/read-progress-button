@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Read Progress Button
  * Description: A round button on posts that fills as you read and leads back to the homepage; it turns into a check mark at the end of the post. Choose its corner on Settings > Read Progress Button. Updates itself from the private GitHub repo stijn/read-progress-button.
- * Version: 1.0.0
+ * Version: 1.1.0
  * Update URI: https://github.com/stijn/read-progress-button
  * Author: Stijn Vogels
  * Requires at least: 6.5
@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'READ_PROGRESS_BUTTON_VERSION', '1.0.0' );
+define( 'READ_PROGRESS_BUTTON_VERSION', '1.1.0' );
 define( 'READ_PROGRESS_BUTTON_FILE', __FILE__ );
 
 require_once __DIR__ . '/includes/updater.php';
@@ -55,8 +55,8 @@ add_action( 'wp_footer', function () {
 	}
 	printf(
 		'<div class="rpb rpb--%1$s"><a class="rpb__link" href="%2$s" aria-label="%3$s">'
-		. '<svg class="rpb__ring" viewBox="0 0 58 58" aria-hidden="true" focusable="false"><circle class="rpb__progress" cx="29" cy="29" r="25"/></svg>'
-		. '<svg class="rpb__mark" viewBox="0 0 24 24" width="28" height="28" aria-hidden="true" focusable="false"><path class="rpb__icon" d="M12 10.588L6.702 5.29a1 1 0 0 0-1.408.004.993.993 0 0 0-.003 1.408L10.588 12l-5.297 5.297a1 1 0 0 0 .003 1.408.993.993 0 0 0 1.408.004L12 13.411l5.298 5.298a.999.999 0 0 0 1.411-1.412L13.412 12l5.297-5.298a1 1 0 0 0-.003-1.408.994.994 0 0 0-1.408-.004z"/></svg>'
+		. '<svg class="rpb__ring" viewBox="0 0 44 44" aria-hidden="true" focusable="false"><circle class="rpb__progress" cx="22" cy="22" r="20.5"/></svg>'
+		. '<svg class="rpb__mark" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false"><path class="rpb__icon" d="M12 10.588L6.702 5.29a1 1 0 0 0-1.408.004.993.993 0 0 0-.003 1.408L10.588 12l-5.297 5.297a1 1 0 0 0 .003 1.408.993.993 0 0 0 1.408.004L12 13.411l5.298 5.298a.999.999 0 0 0 1.411-1.412L13.412 12l5.297-5.298a1 1 0 0 0-.003-1.408.994.994 0 0 0-1.408-.004z"/></svg>'
 		. '</a></div>' . "\n",
 		esc_attr( read_progress_button_position() ),
 		esc_url( home_url( '/' ) ),

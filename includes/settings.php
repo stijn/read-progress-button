@@ -60,7 +60,7 @@ add_action( 'admin_menu', function () {
 									<option value="<?php echo esc_attr( $value ); ?>"<?php selected( read_progress_button_position(), $value ); ?>><?php echo esc_html( $label ); ?></option>
 								<?php endforeach; ?>
 							</select>
-							<p class="description">The corner of the screen where the button sits on posts, 50 px from both edges. Saving empties WP Super Cache, so every post shows the change.</p>
+							<p class="description">The corner of the screen where the button sits on posts, 0.75rem from both edges like Deluminator's switch (top right: just under it). Bottom corners stay above a menu fixed to the bottom of the screen. Saving empties WP Super Cache, so every post shows the change.</p>
 						</td>
 					</tr>
 				</table>

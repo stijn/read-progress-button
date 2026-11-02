@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.0
+- Looks and sits like Deluminator's switch: 44 px instead of 58, 0.75rem from the edges instead of 50 px, the same frosted disc with a hairline shadow instead of a solid one with a heavy drop shadow, the same dark disc and focus ring in dark mode, a 24 px icon and a thinner ring.
+- On phones it slides out of the way with Deluminator's switch while you read on, and comes back with it when you scroll up. At the end of the post the check mark stays.
+- It appears once the site header has scrolled past, so it never sits on the site title.
+- Top right: just under Deluminator's switch. Bottom corners: above a menu fixed to the bottom of the screen. Top corners clear the admin bar.
+
 ## 1.0.0
 - First release from GitHub, and the first that updates itself: from the latest release of the private repo stijn/read-progress-button, with WordPress auto-updates on for this plugin only. Needs a read-only GitHub token (wp-config.php or Settings > Read Progress Button).
 - Settings > Read Progress Button: choose the corner (top left, top right, bottom left, bottom right). Saving empties WP Super Cache.

@@ -5,6 +5,9 @@ Plans for Read Progress Button. The full detail of each release is in [CHANGELOG
 ## Next
 - Nothing planned.
 
+## 1.1.0 (2026-11-02)
+- Matches Deluminator's switch in size, position, disc, shadow and dark mode; tucks away with it on phones.
+
 ## 1.0.0 (2026-11-02)
 - Moved to GitHub with self-updates, a position setting, an SVG ring and no jQuery.
 

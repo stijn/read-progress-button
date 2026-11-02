@@ -1,25 +1,43 @@
 /* Read Progress Button. Copyright (c) 2026 Stijn Vogels. All rights reserved. */
 
+/*
+ * Size, distance from the edges, disc, shadow and focus ring match Deluminator's switch, so the
+ * two read as a pair: 44 px, 0.75rem from the edges, a frosted disc with a hairline shadow.
+ */
 .rpb {
-	--rpb-offset: 50px;
+	--rpb-gap: 0.75rem;
 	position: fixed;
-	z-index: 9999;
-	width: 58px;
-	height: 58px;
-	opacity: 0; /* Hidden until the reader scrolls */
+	z-index: 99999; /* Just under Deluminator's switch */
+	width: 44px;
+	height: 44px;
+	opacity: 0; /* Hidden until the reader is past the site header */
 	visibility: hidden;
-	transition: opacity 0.5s ease, visibility 0.5s;
+	transition: opacity 0.2s ease, visibility 0.2s, transform 0.25s ease;
 }
 
-.rpb--top-left { top: var(--rpb-offset); left: var(--rpb-offset); }
-.rpb--top-right { top: var(--rpb-offset); right: var(--rpb-offset); }
-.rpb--bottom-left { bottom: var(--rpb-offset); left: var(--rpb-offset); }
-.rpb--bottom-right { bottom: var(--rpb-offset); right: var(--rpb-offset); }
+/* --rpb-top clears the admin bar while it's on screen; --rpb-bottom clears a fixed bottom menu. The script sets both. */
+.rpb--top-left { top: calc(var(--rpb-top, 0px) + var(--rpb-gap)); left: var(--rpb-gap); }
+.rpb--top-right { top: calc(var(--rpb-top, 0px) + var(--rpb-gap) + var(--rpb-stack, 0px)); right: var(--rpb-gap); }
+.rpb--bottom-left { bottom: calc(var(--rpb-bottom, 0px) + var(--rpb-gap)); left: var(--rpb-gap); }
+.rpb--bottom-right { bottom: calc(var(--rpb-bottom, 0px) + var(--rpb-gap)); right: var(--rpb-gap); }
+
+/* In the top right corner, under Deluminator's switch rather than on top of it. */
+body:has(.deluminator) .rpb--top-right { --rpb-stack: calc(44px + 0.5rem); }
 
 .rpb--visible {
 	opacity: 1;
 	visibility: visible;
 }
+
+/* On phones it slides out of the way with Deluminator's switch while you read on, and back when you scroll up. */
+.rpb--visible.rpb--tucked {
+	opacity: 0;
+	pointer-events: none;
+}
+.rpb--top-left.rpb--tucked,
+.rpb--top-right.rpb--tucked { transform: translateY(calc(-100% - 1rem)); }
+.rpb--bottom-left.rpb--tucked,
+.rpb--bottom-right.rpb--tucked { transform: translateY(calc(100% + 1rem)); }
 
 .rpb__link {
 	position: relative;
@@ -29,17 +47,31 @@
 	width: 100%;
 	height: 100%;
 	border-radius: 50%;
-	background: #fff;
+	background: rgba(255, 255, 255, 0.72);
+	-webkit-backdrop-filter: blur(8px);
+	backdrop-filter: blur(8px);
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
 	color: #111;
-	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 	cursor: pointer;
+	text-decoration: none;
+	transition: background-color 0.2s ease;
+	-webkit-tap-highlight-color: transparent;
 }
 
-.rpb__link:hover {
-	background-color: #f0f0f0;
+.rpb__link:hover,
+.rpb__link:focus {
+	background: rgba(255, 255, 255, 0.92);
+	color: #111;
 }
 
-/* The ring, drawn from the top, clockwise */
+.rpb__link:focus { outline: none; }
+
+.rpb__link:focus-visible {
+	outline: 2px solid #4169e1;
+	outline-offset: 2px;
+}
+
+/* The ring, just inside the disc's edge, drawn from the top, clockwise */
 .rpb__ring {
 	position: absolute;
 	top: 0;
@@ -51,14 +83,17 @@
 
 .rpb__progress {
 	fill: none;
-	stroke: #0078d7;
-	stroke-width: 4;
+	stroke: #4169e1;
+	stroke-width: 2.5;
+	stroke-linecap: round;
 }
 
 .rpb__mark {
 	position: relative;
 	z-index: 2;
-	transform: translateY(1px); /* Optical centre */
+	display: block;
+	width: 24px;
+	height: 24px;
 }
 
 .rpb__icon {
@@ -68,19 +103,21 @@
 /* Finished */
 @keyframes rpb-scale-up {
 	0% { transform: scale(1); }
-	50% { transform: scale(1.2); }
+	50% { transform: scale(1.15); }
 	100% { transform: scale(1); }
 }
 
-.rpb--done {
-	animation: rpb-scale-up 0.5s ease-in-out;
-}
-
 .rpb--done .rpb__link {
-	background-color: #556b2f; /* Olive green */
-	box-shadow: 0 4px 12px rgba(40, 167, 69, 0.5);
+	animation: rpb-scale-up 0.5s ease-in-out;
+	background: #556b2f; /* Olive green */
 }
 
+.rpb--done .rpb__link:hover,
+.rpb--done .rpb__link:focus {
+	background: #64803a;
+}
+
+/* White on the icon itself: Deluminator's dark link colours outrank a colour on the link. */
 .rpb--done .rpb__icon {
 	fill: none;
 	stroke: #fff;
@@ -93,13 +130,26 @@
 	display: none;
 }
 
-/* Deluminator's dark mode */
-html.deluminator-palette.deluminator-dark .rpb:not(.rpb--done) .rpb__link {
-	background-color: var(--dl-surface, #222);
-	color: var(--dl-text, #eee);
+/* Deluminator's dark mode: the switch's dark disc and hairline ring */
+html.deluminator-dark .rpb:not(.rpb--done) .rpb__link {
+	background: rgba(30, 30, 30, 0.72);
+	box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08);
+	color: var(--dl-strong, #f5f5f5);
 }
 
+html.deluminator-dark .rpb:not(.rpb--done) .rpb__link:hover,
+html.deluminator-dark .rpb:not(.rpb--done) .rpb__link:focus {
+	background: rgba(45, 45, 45, 0.92);
+}
+
+html.deluminator-dark .rpb__link:focus-visible { outline-color: var(--dl-link, #8ab4f8); }
+html.deluminator-dark .rpb__progress { stroke: var(--dl-link, #8ab4f8); }
+
 @media (prefers-reduced-motion: reduce) {
-	.rpb { transition: none; }
-	.rpb--done { animation: none; }
+	.rpb { transition: opacity 0.2s ease, visibility 0.2s; }
+	.rpb--top-left.rpb--tucked,
+	.rpb--top-right.rpb--tucked,
+	.rpb--bottom-left.rpb--tucked,
+	.rpb--bottom-right.rpb--tucked { transform: none; }
+	.rpb--done .rpb__link { animation: none; }
 }

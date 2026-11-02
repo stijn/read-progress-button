@@ -5,8 +5,9 @@ A round button on posts that fills as you read and leads back to the homepage. A
 Copyright (c) 2026 Stijn Vogels. All rights reserved. See [LICENSE](LICENSE).
 
 ## What it does
-- On single posts, a 58 px button appears once the reader scrolls past the top. Its blue ring shows how much of `.entry-content` has come into view; the cross inside links to the homepage.
-- Settings > Read Progress Button: the corner it sits in, 50 px from both edges. Saving empties WP Super Cache when it's there.
+- On single posts, a 44 px button appears once the site header has scrolled past. Its blue ring shows how much of `.entry-content` has come into view; the cross inside links to the homepage.
+- Settings > Read Progress Button: the corner it sits in, 0.75rem from both edges. Saving empties WP Super Cache when it's there.
+- Matches Deluminator's switch: same size, distance from the edges, frosted disc, shadow and focus ring, light and dark. On phones it slides away and back with the switch; in the top right it sits just under it.
 - One small stylesheet and one deferred script, on single posts only. No jQuery, no external requests.
 - Follows Deluminator's dark mode and `prefers-reduced-motion`.
 

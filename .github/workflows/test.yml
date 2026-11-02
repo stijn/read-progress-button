@@ -75,10 +75,10 @@ jobs:
           grep -o '<div class="rpb.*</div>' /tmp/post.html
           need() { grep -Fq "$1" /tmp/post.html || { echo "missing: $1"; grep -o '<[a-z]*[^>]*read-progress-button[^>]*>' /tmp/post.html; exit 1; }; }
           need '<div class="rpb rpb--top-left"><a class="rpb__link" href="http://localhost:8080/" aria-label="Naar de homepage">'
-          need '<circle class="rpb__progress" cx="29" cy="29" r="25"/>'
-          need 'read-progress-button/assets/read-progress-button.css?ver=1.0.0'
+          need '<circle class="rpb__progress" cx="22" cy="22" r="20.5"/>'
+          need 'read-progress-button/assets/read-progress-button.css?ver=1.1.0'
           # Deferred, whatever order WordPress prints the attributes in.
-          grep -o '<script[^>]*read-progress-button\.js?ver=1\.0\.0[^>]*>' /tmp/post.html | grep -q ' defer' || { echo "script not deferred"; grep -o '<script[^>]*read-progress-button[^>]*>' /tmp/post.html; exit 1; }
+          grep -o '<script[^>]*read-progress-button\.js?ver=1\.1\.0[^>]*>' /tmp/post.html | grep -q ' defer' || { echo "script not deferred"; grep -o '<script[^>]*read-progress-button[^>]*>' /tmp/post.html; exit 1; }
           # jQuery isn't needed: the plugin doesn't ask for it (the theme may still load it for itself).
           wp eval 'global $wp_query; $wp_query = new WP_Query( array( "name" => "lang-verhaal", "post_type" => "post" ) ); do_action( "wp_enqueue_scripts" ); $s = wp_scripts()->registered["read-progress-button"] ?? null; if ( ! $s || $s->deps ) { var_dump( $s ); exit( 1 ); } echo "no dependencies\n";' || { echo "script missing or has dependencies"; exit 1; }
           curl -sf http://localhost:8080/ | grep -q 'class="rpb' && exit 1 || true
@@ -105,7 +105,7 @@ jobs:
           set -e
           cd /tmp/wp
           wp option update read_progress_button_github_token test-token-123 --quiet
-          wp eval 'require_once ABSPATH . "wp-admin/includes/admin.php"; wp_set_current_user( 1 ); do_action( "admin_init" ); do_action( "admin_menu" ); ob_start(); do_action( "settings_page_read-progress-button" ); do_action( "admin_page_read-progress-button" ); $h = ob_get_clean(); if ( false !== strpos( $h, "test-token-123" ) ) { exit( 1 ); } foreach ( array( "<select id=\"read_progress_button_position\"", "value=\"top-right\" selected", "Fine-grained personal access token", "Installed version: <strong>1.0.0</strong>" ) as $want ) { if ( false === strpos( $h, $want ) ) { echo $h; exit( 2 ); } } echo "settings OK\n";'
+          wp eval 'require_once ABSPATH . "wp-admin/includes/admin.php"; wp_set_current_user( 1 ); do_action( "admin_init" ); do_action( "admin_menu" ); ob_start(); do_action( "settings_page_read-progress-button" ); do_action( "admin_page_read-progress-button" ); $h = ob_get_clean(); if ( false !== strpos( $h, "test-token-123" ) ) { exit( 1 ); } foreach ( array( "<select id=\"read_progress_button_position\"", "value=\"top-right\" selected", "Fine-grained personal access token", "Installed version: <strong>1.1.0</strong>" ) as $want ) { if ( false === strpos( $h, $want ) ) { echo $h; exit( 2 ); } } echo "settings OK\n";'
           wp eval 'if ( function_exists( "wp_get_ability" ) ) { foreach ( array( "plugin-status", "self-update" ) as $a ) { if ( ! wp_get_ability( "read-progress-button/$a" ) ) { exit( 1 ); } } echo "abilities OK\n"; } else { echo "no Abilities API\n"; }'
           wp plugin list --name=read-progress-button --fields=name,status,version,auto_update
       - name: No PHP notices from the plugin
