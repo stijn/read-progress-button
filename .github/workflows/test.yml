@@ -149,6 +149,18 @@ jobs:
           wp plugin activate read-progress-button
           wp option update read_progress_button_position bottom-left --quiet
           wp plugin list --name=read-progress-button --fields=name,status,version,auto_update
+          # After an update WordPress loads the site to check for fatal errors, and rolls back if it can't.
+          cat > router.php <<'PHP'
+          <?php
+          $path = parse_url( $_SERVER['REQUEST_URI'], PHP_URL_PATH );
+          if ( '/' !== $path && is_file( __DIR__ . $path ) ) {
+          	return false;
+          }
+          $_SERVER['SCRIPT_NAME']     = '/index.php';
+          $_SERVER['SCRIPT_FILENAME'] = __DIR__ . '/index.php';
+          require __DIR__ . '/index.php';
+          PHP
+          (php -S localhost:8080 router.php > /tmp/server.log 2>&1 &) && sleep 2
       - name: WordPress's auto-updater installs the latest release
         env:
           GH_TOKEN: ${{ github.token }}
