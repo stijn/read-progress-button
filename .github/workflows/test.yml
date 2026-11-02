@@ -105,7 +105,7 @@ jobs:
           set -e
           cd /tmp/wp
           wp option update read_progress_button_github_token test-token-123 --quiet
-          wp eval 'require_once ABSPATH . "wp-admin/includes/admin.php"; wp_set_current_user( 1 ); do_action( "admin_init" ); do_action( "admin_menu" ); ob_start(); do_action( "settings_page_read-progress-button" ); $h = ob_get_clean(); if ( false !== strpos( $h, "test-token-123" ) ) { exit( 1 ); } foreach ( array( "<select id=\"read_progress_button_position\"", "value=\"top-right\" selected", "Fine-grained personal access token", "Installed version: <strong>1.0.0</strong>" ) as $want ) { if ( false === strpos( $h, $want ) ) { echo $h; exit( 2 ); } } echo "settings OK\n";'
+          wp eval 'require_once ABSPATH . "wp-admin/includes/admin.php"; wp_set_current_user( 1 ); do_action( "admin_init" ); do_action( "admin_menu" ); ob_start(); do_action( "settings_page_read-progress-button" ); do_action( "admin_page_read-progress-button" ); $h = ob_get_clean(); if ( false !== strpos( $h, "test-token-123" ) ) { exit( 1 ); } foreach ( array( "<select id=\"read_progress_button_position\"", "value=\"top-right\" selected", "Fine-grained personal access token", "Installed version: <strong>1.0.0</strong>" ) as $want ) { if ( false === strpos( $h, $want ) ) { echo $h; exit( 2 ); } } echo "settings OK\n";'
           wp eval 'if ( function_exists( "wp_get_ability" ) ) { foreach ( array( "plugin-status", "self-update" ) as $a ) { if ( ! wp_get_ability( "read-progress-button/$a" ) ) { exit( 1 ); } } echo "abilities OK\n"; } else { echo "no Abilities API\n"; }'
           wp plugin list --name=read-progress-button --fields=name,status,version,auto_update
       - name: No PHP notices from the plugin
