@@ -158,8 +158,10 @@ jobs:
           LATEST=$(gh release view --repo "$GITHUB_REPOSITORY" --json tagName -q .tagName); LATEST=${LATEST#v}
           echo "latest release: $LATEST"
           wp eval 'read_progress_button_update_checker()->checkForUpdates(); $u = read_progress_button_update_checker()->getUpdate(); echo "offered: ", $u ? $u->version : "nothing", "\n";'
-          wp eval 'wp_update_plugins(); define( "DOING_CRON", true ); wp_maybe_auto_update();'
-          wp plugin list --name=read-progress-button --fields=name,status,version
+          wp eval 'wp_update_plugins(); define( "DOING_CRON", true ); add_action( "automatic_updates_complete", function ( $results ) { foreach ( (array) ( $results["plugin"] ?? array() ) as $r ) { echo "result: ", wp_json_encode( array( "name" => $r->name ?? "", "result" => is_wp_error( $r->result ) ? $r->result->get_error_message() : $r->result, "messages" => $r->messages ?? array() ) ), "\n"; } } ); wp_maybe_auto_update();'
+          ls -la wp-content/plugins wp-content/plugins/read-progress-button 2>&1 | head -30
+          ls -R wp-content/upgrade wp-content/upgrade-temp-backup 2>/dev/null | head -20 || true
+          wp plugin list --fields=name,status,version
           [ "$(wp plugin get read-progress-button --field=version)" = "$LATEST" ]
           wp plugin is-active read-progress-button
           [ "$(wp option get read_progress_button_position)" = "bottom-left" ]
