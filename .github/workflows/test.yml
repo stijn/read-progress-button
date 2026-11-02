@@ -73,11 +73,13 @@ jobs:
           POST=$(wp post list --post_type=post --name=lang-verhaal --field=url)
           curl -sf "$POST" -o /tmp/post.html
           grep -o '<div class="rpb.*</div>' /tmp/post.html
-          grep -q '<div class="rpb rpb--top-left"><a class="rpb__link" href="http://localhost:8080/" aria-label="Naar de homepage">' /tmp/post.html
-          grep -q '<circle class="rpb__progress" cx="29" cy="29" r="25"/>' /tmp/post.html
-          grep -q 'read-progress-button/assets/read-progress-button.css?ver=1.0.0' /tmp/post.html
-          grep -Eq '<script[^>]*read-progress-button/assets/read-progress-button.js\?ver=1.0.0[^>]*defer' /tmp/post.html
-          if grep -q 'jquery' /tmp/post.html; then echo "jQuery loaded"; exit 1; fi
+          need() { grep -Fq "$1" /tmp/post.html || { echo "missing: $1"; grep -o '<[a-z]*[^>]*read-progress-button[^>]*>' /tmp/post.html; exit 1; }; }
+          need '<div class="rpb rpb--top-left"><a class="rpb__link" href="http://localhost:8080/" aria-label="Naar de homepage">'
+          need '<circle class="rpb__progress" cx="29" cy="29" r="25"/>'
+          need 'read-progress-button/assets/read-progress-button.css?ver=1.0.0'
+          grep -Eq '<script[^>]*read-progress-button/assets/read-progress-button\.js\?ver=1\.0\.0[^>]*defer' /tmp/post.html || { echo "script not deferred"; grep -o '<script[^>]*read-progress-button[^>]*>' /tmp/post.html; exit 1; }
+          # jQuery isn't needed: the plugin doesn't ask for it (the theme may still load it for itself).
+          wp eval 'global $wp_scripts; wp_enqueue_scripts(); $s = wp_scripts()->registered["read-progress-button"] ?? null; if ( ! $s || $s->deps ) { var_dump( $s ); exit( 1 ); } echo "no dependencies\n";' --url="$POST" || { echo "script has dependencies"; exit 1; }
           curl -sf http://localhost:8080/ | grep -q 'class="rpb' && exit 1 || true
           curl -sf "$(wp post list --post_type=page --name=een-pagina --field=url)" | grep -q 'class="rpb' && exit 1 || true
           echo "front end OK"
