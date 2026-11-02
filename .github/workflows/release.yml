@@ -1,0 +1,38 @@
+name: Release
+
+# A pushed v* tag: check it matches the plugin's version, lint, build read-progress-button.zip
+# (folder read-progress-button/ inside) and create the release. Sites pick it up through
+# plugin-update-checker and auto-update.
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check the version matches the tag
+        run: |
+          HEADER=$(grep -m1 -E '^\s*\*\s*Version:' read-progress-button.php | sed -E 's/.*Version:\s*//' | tr -d '[:space:]')
+          CONST=$(grep -m1 "READ_PROGRESS_BUTTON_VERSION'," read-progress-button.php | sed -E "s/.*'([0-9.]+)'.*/\1/")
+          echo "header=$HEADER const=$CONST tag=$GITHUB_REF_NAME"
+          test "v$HEADER" = "$GITHUB_REF_NAME" && test "$HEADER" = "$CONST"
+      - name: Lint PHP
+        run: for f in read-progress-button.php includes/*.php; do php -l "$f"; done
+      - name: Build zip
+        run: |
+          mkdir -p build/read-progress-button
+          cp -r read-progress-button.php includes assets vendor LICENSE build/read-progress-button/
+          cd build && zip -qr ../read-progress-button.zip read-progress-button
+      - name: Create release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          V="${GITHUB_REF_NAME#v}"
+          NOTES=$(awk -v v="$V" '$0 == "## "v {f=1; next} /^## / {f=0} f' CHANGELOG.md)
+          gh release create "$GITHUB_REF_NAME" read-progress-button.zip --title "$GITHUB_REF_NAME" --notes "${NOTES:-Release $GITHUB_REF_NAME}"

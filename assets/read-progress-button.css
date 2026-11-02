@@ -1,0 +1,105 @@
+/* Read Progress Button. Copyright (c) 2026 Stijn Vogels. All rights reserved. */
+
+.rpb {
+	--rpb-offset: 50px;
+	position: fixed;
+	z-index: 9999;
+	width: 58px;
+	height: 58px;
+	opacity: 0; /* Hidden until the reader scrolls */
+	visibility: hidden;
+	transition: opacity 0.5s ease, visibility 0.5s;
+}
+
+.rpb--top-left { top: var(--rpb-offset); left: var(--rpb-offset); }
+.rpb--top-right { top: var(--rpb-offset); right: var(--rpb-offset); }
+.rpb--bottom-left { bottom: var(--rpb-offset); left: var(--rpb-offset); }
+.rpb--bottom-right { bottom: var(--rpb-offset); right: var(--rpb-offset); }
+
+.rpb--visible {
+	opacity: 1;
+	visibility: visible;
+}
+
+.rpb__link {
+	position: relative;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: 100%;
+	height: 100%;
+	border-radius: 50%;
+	background: #fff;
+	color: #111;
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+	cursor: pointer;
+}
+
+.rpb__link:hover {
+	background-color: #f0f0f0;
+}
+
+/* The ring, drawn from the top, clockwise */
+.rpb__ring {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	transform: rotate(-90deg);
+}
+
+.rpb__progress {
+	fill: none;
+	stroke: #0078d7;
+	stroke-width: 4;
+}
+
+.rpb__mark {
+	position: relative;
+	z-index: 2;
+	transform: translateY(1px); /* Optical centre */
+}
+
+.rpb__icon {
+	fill: currentColor;
+}
+
+/* Finished */
+@keyframes rpb-scale-up {
+	0% { transform: scale(1); }
+	50% { transform: scale(1.2); }
+	100% { transform: scale(1); }
+}
+
+.rpb--done {
+	animation: rpb-scale-up 0.5s ease-in-out;
+}
+
+.rpb--done .rpb__link {
+	background-color: #556b2f; /* Olive green */
+	box-shadow: 0 4px 12px rgba(40, 167, 69, 0.5);
+}
+
+.rpb--done .rpb__icon {
+	fill: none;
+	stroke: #fff;
+	stroke-width: 2;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+}
+
+.rpb--done .rpb__ring {
+	display: none;
+}
+
+/* Deluminator's dark mode */
+html.deluminator-palette.deluminator-dark .rpb:not(.rpb--done) .rpb__link {
+	background-color: var(--dl-surface, #222);
+	color: var(--dl-text, #eee);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.rpb { transition: none; }
+	.rpb--done { animation: none; }
+}

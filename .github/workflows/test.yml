@@ -1,0 +1,163 @@
+name: Test
+
+# Every push and pull request: the plugin in a real WordPress (Twenty Nineteen, Dutch) on PHP 7.4,
+# 8.3 and 8.5. Run by hand (Run workflow) it also tests the whole update cycle: an older copy
+# updates itself to the latest GitHub release through wp_maybe_auto_update(), with DOING_CRON set.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  wordpress:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: wp
+        ports: ['3306:3306']
+        options: --health-cmd="mysqladmin ping -proot" --health-interval=5s --health-timeout=5s --health-retries=30
+    strategy:
+      matrix:
+        php: ['7.4', '8.3', '8.5']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          tools: wp-cli
+          extensions: mysqli
+      - name: Lint
+        run: for f in read-progress-button.php includes/*.php; do php -l "$f"; done
+      - name: Install WordPress and the plugin
+        run: |
+          mkdir /tmp/wp && cd /tmp/wp
+          wp core download --quiet
+          wp config create --dbname=wp --dbuser=root --dbpass=root --dbhost=127.0.0.1 --extra-php <<'PHP'
+          define( 'WP_DEBUG', true );
+          define( 'WP_DEBUG_LOG', '/tmp/wp-debug.log' );
+          define( 'WP_DEBUG_DISPLAY', false );
+          define( 'DISABLE_WP_CRON', true );
+          PHP
+          wp core install --url=http://localhost:8080 --title=Test --admin_user=admin --admin_password=admin-test --admin_email=admin@example.com --skip-email
+          wp language core install nl_NL --activate
+          wp rewrite structure '/%postname%/' --hard
+          wp theme install twentynineteen --activate
+          mkdir -p wp-content/plugins/read-progress-button
+          cp -r "$GITHUB_WORKSPACE"/{read-progress-button.php,includes,assets,vendor,LICENSE} wp-content/plugins/read-progress-button/
+          wp plugin activate read-progress-button
+          wp post create --post_title="Lang verhaal" --post_status=publish --post_content="$(for i in $(seq 1 60); do printf '<p>Alinea %s.</p>' "$i"; done)" --quiet
+          wp post create --post_type=page --post_title="Een pagina" --post_status=publish --quiet
+          cat > router.php <<'PHP'
+          <?php
+          $path = parse_url( $_SERVER['REQUEST_URI'], PHP_URL_PATH );
+          if ( '/' !== $path && is_file( __DIR__ . $path ) ) {
+          	return false;
+          }
+          $_SERVER['SCRIPT_NAME']     = '/index.php';
+          $_SERVER['SCRIPT_FILENAME'] = __DIR__ . '/index.php';
+          require __DIR__ . '/index.php';
+          PHP
+          (php -S localhost:8080 router.php > /tmp/server.log 2>&1 &) && sleep 2
+      - name: The button on posts only
+        run: |
+          set -e
+          cd /tmp/wp
+          POST=$(wp post list --post_type=post --name=lang-verhaal --field=url)
+          curl -sf "$POST" -o /tmp/post.html
+          grep -o '<div class="rpb.*</div>' /tmp/post.html
+          grep -q '<div class="rpb rpb--top-left"><a class="rpb__link" href="http://localhost:8080/" aria-label="Naar de homepage">' /tmp/post.html
+          grep -q '<circle class="rpb__progress" cx="29" cy="29" r="25"/>' /tmp/post.html
+          grep -q 'read-progress-button/assets/read-progress-button.css?ver=1.0.0' /tmp/post.html
+          grep -Eq '<script[^>]*read-progress-button/assets/read-progress-button.js\?ver=1.0.0[^>]*defer' /tmp/post.html
+          if grep -q 'jquery' /tmp/post.html; then echo "jQuery loaded"; exit 1; fi
+          curl -sf http://localhost:8080/ | grep -q 'class="rpb' && exit 1 || true
+          curl -sf "$(wp post list --post_type=page --name=een-pagina --field=url)" | grep -q 'class="rpb' && exit 1 || true
+          echo "front end OK"
+      - name: Position setting
+        run: |
+          set -e
+          cd /tmp/wp
+          POST=$(wp post list --post_type=post --name=lang-verhaal --field=url)
+          for p in top-right bottom-left bottom-right top-left; do
+            wp option update read_progress_button_position "$p" --quiet
+            curl -sf "$POST" | grep -q "<div class=\"rpb rpb--$p\">"
+          done
+          wp option update read_progress_button_position nonsense --quiet
+          curl -sf "$POST" | grep -q '<div class="rpb rpb--top-left">'
+          wp option update read_progress_button_position bottom-right --quiet
+          wp eval 'do_action( "admin_init" ); if ( "bottom-right" !== sanitize_option( "read_progress_button_position", "middle" ) || "top-right" !== sanitize_option( "read_progress_button_position", "top-right" ) ) { exit( 1 ); } echo "sanitize OK\n";'
+          # A new corner empties WP Super Cache when it's there.
+          [ "$(wp eval 'function wp_cache_clear_cache() { echo "cleared"; } update_option( "read_progress_button_position", "top-right" ); update_option( "read_progress_button_position", "top-right" );')" = "cleared" ]
+          echo "position OK"
+      - name: Settings page, token never shown, abilities
+        run: |
+          set -e
+          cd /tmp/wp
+          wp option update read_progress_button_github_token test-token-123 --quiet
+          wp eval 'require_once ABSPATH . "wp-admin/includes/admin.php"; wp_set_current_user( 1 ); do_action( "admin_init" ); do_action( "admin_menu" ); ob_start(); do_action( "settings_page_read-progress-button" ); $h = ob_get_clean(); if ( false !== strpos( $h, "test-token-123" ) ) { exit( 1 ); } foreach ( array( "<select id=\"read_progress_button_position\"", "value=\"top-right\" selected", "Fine-grained personal access token", "Installed version: <strong>1.0.0</strong>" ) as $want ) { if ( false === strpos( $h, $want ) ) { echo $h; exit( 2 ); } } echo "settings OK\n";'
+          wp eval 'if ( function_exists( "wp_get_ability" ) ) { foreach ( array( "plugin-status", "self-update" ) as $a ) { if ( ! wp_get_ability( "read-progress-button/$a" ) ) { exit( 1 ); } } echo "abilities OK\n"; } else { echo "no Abilities API\n"; }'
+          wp plugin list --name=read-progress-button --fields=name,status,version,auto_update
+      - name: No PHP notices from the plugin
+        if: always()
+        run: |
+          cat /tmp/server.log || true
+          if [ -f /tmp/wp-debug.log ]; then cat /tmp/wp-debug.log; if grep -i 'read-progress-button' /tmp/wp-debug.log; then exit 1; fi; fi
+
+  update-cycle:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: wp
+        ports: ['3306:3306']
+        options: --health-cmd="mysqladmin ping -proot" --health-interval=5s --health-timeout=5s --health-retries=30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          tools: wp-cli
+          extensions: mysqli
+      - name: Install WordPress and an older copy of the plugin
+        env:
+          TOKEN: ${{ github.token }}
+        run: |
+          mkdir /tmp/wp && cd /tmp/wp
+          wp core download --quiet
+          wp config create --dbname=wp --dbuser=root --dbpass=root --dbhost=127.0.0.1 --extra-php <<PHP
+          define( 'DISABLE_WP_CRON', true );
+          define( 'READ_PROGRESS_BUTTON_GITHUB_TOKEN', '$TOKEN' );
+          PHP
+          wp core install --url=http://localhost:8080 --title=Test --admin_user=admin --admin_password=admin-test --admin_email=admin@example.com --skip-email
+          mkdir -p wp-content/plugins/read-progress-button
+          cp -r "$GITHUB_WORKSPACE"/{read-progress-button.php,includes,assets,vendor,LICENSE} wp-content/plugins/read-progress-button/
+          sed -i -E "s/Version: [0-9.]+/Version: 0.9.0/; s/'READ_PROGRESS_BUTTON_VERSION', '[0-9.]+'/'READ_PROGRESS_BUTTON_VERSION', '0.9.0'/" wp-content/plugins/read-progress-button/read-progress-button.php
+          wp plugin activate read-progress-button
+          wp option update read_progress_button_position bottom-left --quiet
+          wp plugin list --name=read-progress-button --fields=name,status,version,auto_update
+      - name: WordPress's auto-updater installs the latest release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -e
+          cd /tmp/wp
+          LATEST=$(gh release view --repo "$GITHUB_REPOSITORY" --json tagName -q .tagName); LATEST=${LATEST#v}
+          echo "latest release: $LATEST"
+          wp eval 'read_progress_button_update_checker()->checkForUpdates(); $u = read_progress_button_update_checker()->getUpdate(); echo "offered: ", $u ? $u->version : "nothing", "\n";'
+          wp eval 'wp_update_plugins(); define( "DOING_CRON", true ); wp_maybe_auto_update();'
+          wp plugin list --name=read-progress-button --fields=name,status,version
+          [ "$(wp plugin get read-progress-button --field=version)" = "$LATEST" ]
+          wp plugin is-active read-progress-button
+          [ "$(wp option get read_progress_button_position)" = "bottom-left" ]
+          echo "update cycle OK: 0.9.0 -> $LATEST, still active, settings kept"

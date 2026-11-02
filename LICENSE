@@ -1,0 +1,9 @@
+Copyright (c) 2026 Stijn Vogels. All rights reserved.
+
+This software, Read Progress Button, including its source code, styles, scripts and
+documentation, is the property of Stijn Vogels. No licence is granted. You may not use, copy,
+modify, merge, publish, distribute, sublicense or sell it, in whole or in part, without prior
+written permission from Stijn Vogels.
+
+Third-party code: vendor/plugin-update-checker is plugin-update-checker by Jānis Elsts, under the
+MIT licence in vendor/plugin-update-checker/license.txt. That licence covers that code only.
