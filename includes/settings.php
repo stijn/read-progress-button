@@ -1,6 +1,6 @@
 <?php
 /**
- * Settings > Read Progress Button: the button's corner, the GitHub token and the update status.
+ * Settings > Read Progress Button: the button's corner, an optional GitHub token and the update status.
  *
  * A new corner changes every post's HTML, so saving one empties WP Super Cache when it's there
  * (aardling.com's theme then clears Cloudflare too).
@@ -74,7 +74,7 @@ add_action( 'admin_menu', function () {
 			<?php else : ?>
 				No newer release found<?php echo $state && $state->getLastCheck() ? ' (last check ' . esc_html( human_time_diff( $state->getLastCheck() ) ) . ' ago)' : ''; ?>.
 			<?php endif; ?></p>
-			<p>Updates come from the private GitHub repo <code>stijn/read-progress-button</code> (latest release, asset <code>read-progress-button.zip</code>). Auto-updates are on for this plugin.</p>
+			<p>Updates come from the public GitHub repo <code>stijn/read-progress-button</code> (latest release, asset <code>read-progress-button.zip</code>). Auto-updates are on for this plugin.</p>
 			<form method="post" action="options.php">
 				<?php settings_fields( 'read_progress_button_token' ); ?>
 				<table class="form-table" role="presentation">
@@ -85,7 +85,7 @@ add_action( 'admin_menu', function () {
 								<p>Set in wp-config.php (READ_PROGRESS_BUTTON_GITHUB_TOKEN).</p>
 							<?php else : ?>
 								<input type="password" id="read_progress_button_github_token" name="read_progress_button_github_token" value="" class="regular-text" autocomplete="off" placeholder="<?php echo $has_token ? esc_attr( 'Saved. Paste a new one to replace it.' ) : ''; ?>">
-								<p class="description">Fine-grained personal access token, repository <code>stijn/read-progress-button</code> only, permission Contents: Read-only. <?php echo $has_token ? 'A token is saved. Leave empty to keep it, or type __clear__ to remove it.' : 'No token saved yet: updates cannot be fetched.'; ?></p>
+								<p class="description">Optional. Updates work without one; a token only raises GitHub's limit of 60 requests an hour per server, which sites on a shared host share. Fine-grained personal access token, repository <code>stijn/read-progress-button</code> only, permission Contents: Read-only. <?php echo $has_token ? 'A token is saved. Leave empty to keep it, or type __clear__ to remove it.' : 'No token saved.'; ?></p>
 							<?php endif; ?>
 						</td>
 					</tr>

@@ -1,8 +1,8 @@
 <?php
 /**
  * Plugin Name: Read Progress Button
- * Description: A round button on posts that fills as you read and leads back to the homepage; it turns into a check mark at the end of the post. Choose its corner on Settings > Read Progress Button. Updates itself from the private GitHub repo stijn/read-progress-button.
- * Version: 1.1.0
+ * Description: A round button on posts that fills as you read and leads back to the homepage; it turns into a check mark at the end of the post. Choose its corner on Settings > Read Progress Button. Updates itself from the GitHub releases of stijn/read-progress-button.
+ * Version: 1.1.1
  * Update URI: https://github.com/stijn/read-progress-button
  * Author: Stijn Vogels
  * Requires at least: 6.5
@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'READ_PROGRESS_BUTTON_VERSION', '1.1.0' );
+define( 'READ_PROGRESS_BUTTON_VERSION', '1.1.1' );
 define( 'READ_PROGRESS_BUTTON_FILE', __FILE__ );
 
 require_once __DIR__ . '/includes/updater.php';

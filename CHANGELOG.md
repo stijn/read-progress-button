@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.1.1
+- The repo is public now, so updates no longer need a GitHub token. The token field stays, optional: it raises GitHub's limit of 60 requests an hour per server.
+- The self-update ability no longer refuses to run without a token.
+- The update-cycle test runs without a token.
+
 ## 1.1.0
 - Looks and sits like Deluminator's switch: 44 px instead of 58, 0.75rem from the edges instead of 50 px, the same frosted disc with a hairline shadow instead of a solid one with a heavy drop shadow, the same dark disc and focus ring in dark mode, a 24 px icon and a thinner ring.
 - On phones it slides out of the way with Deluminator's switch while you read on, and comes back with it when you scroll up. At the end of the post the check mark stays.

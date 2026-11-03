@@ -76,7 +76,7 @@ jobs:
           need() { grep -Fq "$1" /tmp/post.html || { echo "missing: $1"; grep -o '<[a-z]*[^>]*read-progress-button[^>]*>' /tmp/post.html; exit 1; }; }
           need '<div class="rpb rpb--top-left"><a class="rpb__link" href="http://localhost:8080/" aria-label="Naar de homepage">'
           need '<circle class="rpb__progress" cx="22" cy="22" r="20.5"/>'
-          need 'read-progress-button/assets/read-progress-button.css?ver=1.1.0'
+          need 'read-progress-button/assets/read-progress-button.css?ver=1.1.1'
           # Deferred, whatever order WordPress prints the attributes in.
           grep -o '<script[^>]*read-progress-button\.js?ver=1\.1\.0[^>]*>' /tmp/post.html | grep -q ' defer' || { echo "script not deferred"; grep -o '<script[^>]*read-progress-button[^>]*>' /tmp/post.html; exit 1; }
           # jQuery isn't needed: the plugin doesn't ask for it (the theme may still load it for itself).
@@ -105,7 +105,7 @@ jobs:
           set -e
           cd /tmp/wp
           wp option update read_progress_button_github_token test-token-123 --quiet
-          wp eval 'require_once ABSPATH . "wp-admin/includes/admin.php"; wp_set_current_user( 1 ); do_action( "admin_init" ); do_action( "admin_menu" ); ob_start(); do_action( "settings_page_read-progress-button" ); do_action( "admin_page_read-progress-button" ); $h = ob_get_clean(); if ( false !== strpos( $h, "test-token-123" ) ) { exit( 1 ); } foreach ( array( "<select id=\"read_progress_button_position\"", "value=\"top-right\" selected", "Fine-grained personal access token", "Installed version: <strong>1.1.0</strong>" ) as $want ) { if ( false === strpos( $h, $want ) ) { echo $h; exit( 2 ); } } echo "settings OK\n";'
+          wp eval 'require_once ABSPATH . "wp-admin/includes/admin.php"; wp_set_current_user( 1 ); do_action( "admin_init" ); do_action( "admin_menu" ); ob_start(); do_action( "settings_page_read-progress-button" ); do_action( "admin_page_read-progress-button" ); $h = ob_get_clean(); if ( false !== strpos( $h, "test-token-123" ) ) { exit( 1 ); } foreach ( array( "<select id=\"read_progress_button_position\"", "value=\"top-right\" selected", "Fine-grained personal access token", "Installed version: <strong>1.1.1</strong>" ) as $want ) { if ( false === strpos( $h, $want ) ) { echo $h; exit( 2 ); } } echo "settings OK\n";'
           wp eval 'if ( function_exists( "wp_get_ability" ) ) { foreach ( array( "plugin-status", "self-update" ) as $a ) { if ( ! wp_get_ability( "read-progress-button/$a" ) ) { exit( 1 ); } } echo "abilities OK\n"; } else { echo "no Abilities API\n"; }'
           wp plugin list --name=read-progress-button --fields=name,status,version,auto_update
       - name: No PHP notices from the plugin
@@ -132,15 +132,12 @@ jobs:
           php-version: '8.3'
           tools: wp-cli
           extensions: mysqli
-      - name: Install WordPress and an older copy of the plugin
-        env:
-          TOKEN: ${{ github.token }}
+      - name: Install WordPress and an older copy of the plugin, without a token
         run: |
           mkdir /tmp/wp && cd /tmp/wp
           wp core download --quiet
           wp config create --dbname=wp --dbuser=root --dbpass=root --dbhost=127.0.0.1 --extra-php <<PHP
           define( 'DISABLE_WP_CRON', true );
-          define( 'READ_PROGRESS_BUTTON_GITHUB_TOKEN', '$TOKEN' );
           PHP
           wp core install --url=http://localhost:8080 --title=Test --admin_user=admin --admin_password=admin-test --admin_email=admin@example.com --skip-email
           mkdir -p wp-content/plugins/read-progress-button

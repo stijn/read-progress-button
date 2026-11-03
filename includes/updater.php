@@ -1,12 +1,13 @@
 <?php
 /**
- * Self-updating from the private GitHub repo stijn/read-progress-button.
+ * Self-updating from the public GitHub repo stijn/read-progress-button.
  *
  * How it works:
  * - plugin-update-checker (MIT, vendored) looks at the latest GitHub release of the repo and
  *   offers its "read-progress-button.zip" asset as an update.
- * - The repo is private, so it needs a read-only GitHub token: a fine-grained token for this repo
- *   only, with Contents: Read-only. Put it in wp-config.php as
+ * - The repo is public, so no token is needed. An optional read-only token raises GitHub's limit
+ *   of 60 requests an hour per server, which every site on a shared host's IP address shares: a
+ *   fine-grained token for this repo only, with Contents: Read-only. Put it in wp-config.php as
  *   define( 'READ_PROGRESS_BUTTON_GITHUB_TOKEN', '...' ); or paste it on Settings > Read Progress
  *   Button. The token is never shown again after saving, logged or returned by an ability.
  * - WordPress auto-updates are switched on for this plugin only.
@@ -162,9 +163,6 @@ add_action( 'wp_abilities_api_init', function () {
 		'permission_callback' => $can_update,
 		'execute_callback'    => function ( $input = null ) use ( $status ) {
 			$before = $status( true );
-			if ( ! $before['token_configured'] ) {
-				return new WP_Error( 'read_progress_button_no_token', 'No GitHub token configured (Settings > Read Progress Button).' );
-			}
 			if ( empty( $before['available_version'] ) || version_compare( $before['available_version'], READ_PROGRESS_BUTTON_VERSION, '<=' ) ) {
 				return array_merge( $before, array( 'updated' => false, 'message' => 'Already up to date.' ) );
 			}

@@ -5,6 +5,9 @@ Plans for Read Progress Button. The full detail of each release is in [CHANGELOG
 ## Next
 - Nothing planned.
 
+## 1.1.1 (2026-11-03)
+- Updates from the public repo without a token; the token is optional.
+
 ## 1.1.0 (2026-11-02)
 - Matches Deluminator's switch in size, position, disc, shadow and dark mode; tucks away with it on phones.
 
@@ -17,4 +20,3 @@ Plans for Read Progress Button. The full detail of each release is in [CHANGELOG
 ## Not planned
 - An open-source licence: the plugin is Stijn's own, all rights reserved.
 - Distribution on wordpress.org: it would need a GPL licence.
-- A public repo: updates come from the private repo with a read-only token.
