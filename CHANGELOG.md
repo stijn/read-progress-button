@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.2.1
+- The link's label for screen readers is English ("To the homepage") on posts tagged English, as aardling.com's theme does for its own labels.
+
 ## 1.2.0
 - Stays on screen while you scroll again, as before 1.1.0: it shows once you scroll down 50 px, no longer waits for the site header to scroll past, and no longer slides away with Deluminator's switch on phones.
 - The green glow is back at the end of the post, in light and dark mode, with the original bounce to 1.2 times its size.
