@@ -78,7 +78,7 @@ jobs:
           need '<circle class="rpb__progress" cx="22" cy="22" r="20.5"/>'
           need 'read-progress-button/assets/read-progress-button.css?ver=1.1.1'
           # Deferred, whatever order WordPress prints the attributes in.
-          grep -o '<script[^>]*read-progress-button\.js?ver=1\.1\.0[^>]*>' /tmp/post.html | grep -q ' defer' || { echo "script not deferred"; grep -o '<script[^>]*read-progress-button[^>]*>' /tmp/post.html; exit 1; }
+          grep -o '<script[^>]*read-progress-button\.js?ver=1\.1\.1[^>]*>' /tmp/post.html | grep -q ' defer' || { echo "script not deferred"; grep -o '<script[^>]*read-progress-button[^>]*>' /tmp/post.html; exit 1; }
           # jQuery isn't needed: the plugin doesn't ask for it (the theme may still load it for itself).
           wp eval 'global $wp_query; $wp_query = new WP_Query( array( "name" => "lang-verhaal", "post_type" => "post" ) ); do_action( "wp_enqueue_scripts" ); $s = wp_scripts()->registered["read-progress-button"] ?? null; if ( ! $s || $s->deps ) { var_dump( $s ); exit( 1 ); } echo "no dependencies\n";' || { echo "script missing or has dependencies"; exit 1; }
           curl -sf http://localhost:8080/ | grep -q 'class="rpb' && exit 1 || true
