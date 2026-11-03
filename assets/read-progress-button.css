@@ -10,9 +10,9 @@
 	z-index: 99999; /* Just under Deluminator's switch */
 	width: 44px;
 	height: 44px;
-	opacity: 0; /* Hidden until the reader is past the site header */
+	opacity: 0; /* Hidden until the reader scrolls; then it stays while scrolling */
 	visibility: hidden;
-	transition: opacity 0.2s ease, visibility 0.2s, transform 0.25s ease;
+	transition: opacity 0.2s ease, visibility 0.2s;
 }
 
 /* --rpb-top clears the admin bar while it's on screen; --rpb-bottom clears a fixed bottom menu. The script sets both. */
@@ -28,16 +28,6 @@ body:has(.deluminator) .rpb--top-right { --rpb-stack: calc(44px + 0.5rem); }
 	opacity: 1;
 	visibility: visible;
 }
-
-/* On phones it slides out of the way with Deluminator's switch while you read on, and back when you scroll up. */
-.rpb--visible.rpb--tucked {
-	opacity: 0;
-	pointer-events: none;
-}
-.rpb--top-left.rpb--tucked,
-.rpb--top-right.rpb--tucked { transform: translateY(calc(-100% - 1rem)); }
-.rpb--bottom-left.rpb--tucked,
-.rpb--bottom-right.rpb--tucked { transform: translateY(calc(100% + 1rem)); }
 
 .rpb__link {
 	position: relative;
@@ -103,13 +93,14 @@ body:has(.deluminator) .rpb--top-right { --rpb-stack: calc(44px + 0.5rem); }
 /* Finished */
 @keyframes rpb-scale-up {
 	0% { transform: scale(1); }
-	50% { transform: scale(1.15); }
+	50% { transform: scale(1.2); }
 	100% { transform: scale(1); }
 }
 
 .rpb--done .rpb__link {
 	animation: rpb-scale-up 0.5s ease-in-out;
 	background: #556b2f; /* Olive green */
+	box-shadow: 0 4px 12px rgba(40, 167, 69, 0.5); /* Green glow, light and dark */
 }
 
 .rpb--done .rpb__link:hover,
@@ -146,10 +137,6 @@ html.deluminator-dark .rpb__link:focus-visible { outline-color: var(--dl-link, #
 html.deluminator-dark .rpb__progress { stroke: var(--dl-link, #8ab4f8); }
 
 @media (prefers-reduced-motion: reduce) {
-	.rpb { transition: opacity 0.2s ease, visibility 0.2s; }
-	.rpb--top-left.rpb--tucked,
-	.rpb--top-right.rpb--tucked,
-	.rpb--bottom-left.rpb--tucked,
-	.rpb--bottom-right.rpb--tucked { transform: none; }
+	.rpb { transition: none; }
 	.rpb--done .rpb__link { animation: none; }
 }

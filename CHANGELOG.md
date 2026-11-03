@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.0
+- Stays on screen while you scroll again, as before 1.1.0: it shows once you scroll down 50 px, no longer waits for the site header to scroll past, and no longer slides away with Deluminator's switch on phones.
+- The green glow is back at the end of the post, in light and dark mode, with the original bounce to 1.2 times its size.
+
 ## 1.1.1
 - The repo is public now, so updates no longer need a GitHub token. The token field stays, optional: it raises GitHub's limit of 60 requests an hour per server.
 - The self-update ability no longer refuses to run without a token.

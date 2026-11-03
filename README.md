@@ -1,13 +1,13 @@
 # Read Progress Button
 
-A round button on posts that fills as you read and leads back to the homepage. At the end of the post it turns olive green with a check mark. Plans and past releases: [roadmap.md](roadmap.md); full detail: [CHANGELOG.md](CHANGELOG.md).
+A round button on posts that fills as you read and leads back to the homepage. At the end of the post it grows for a moment and turns olive green, with a green glow and a check mark. Plans and past releases: [roadmap.md](roadmap.md); full detail: [CHANGELOG.md](CHANGELOG.md).
 
 Copyright (c) 2026 Stijn Vogels. All rights reserved. See [LICENSE](LICENSE). The repo is public so sites can update without a token; that gives no right to use, copy or change the code.
 
 ## What it does
-- On single posts, a 44 px button appears once the site header has scrolled past. Its blue ring shows how much of `.entry-content` has come into view; the cross inside links to the homepage.
+- On single posts, a 44 px button appears once you scroll down 50 px and stays on screen while you scroll. Its blue ring shows how much of `.entry-content` has come into view; the cross inside links to the homepage.
 - Settings > Read Progress Button: the corner it sits in, 0.75rem from both edges. Saving empties WP Super Cache when it's there.
-- Matches Deluminator's switch: same size, distance from the edges, frosted disc, shadow and focus ring, light and dark. On phones it slides away and back with the switch; in the top right it sits just under it.
+- Matches Deluminator's switch: same size, distance from the edges, frosted disc, shadow and focus ring, light and dark. In the top right it sits just under it.
 - One small stylesheet and one deferred script, on single posts only. No jQuery, no external requests.
 - Follows Deluminator's dark mode and `prefers-reduced-motion`.
 

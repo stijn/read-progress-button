@@ -5,6 +5,9 @@ Plans for Read Progress Button. The full detail of each release is in [CHANGELOG
 ## Next
 - Nothing planned.
 
+## 1.2.0 (2026-11-03)
+- Stays visible while scrolling again; the green glow at the end is back.
+
 ## 1.1.1 (2026-11-03)
 - Updates from the public repo without a token; the token is optional.
 

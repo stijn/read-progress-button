@@ -5,8 +5,6 @@
 	if (!button || !content) {
 		return;
 	}
-	var header = document.querySelector('.site-header');
-	var switcher = document.querySelector('.deluminator'); // Deluminator's light/dark switch, when it's there.
 	var progress = button.querySelector('.rpb__progress');
 	var icon = button.querySelector('.rpb__icon');
 	var cross = icon.getAttribute('d');
@@ -34,27 +32,19 @@
 		button.style.setProperty('--rpb-bottom', lift + 'px');
 	}
 
-	// Slide away and back with Deluminator's switch, which does so only where it would cover the text
-	// (phones). At the end of the post the check mark stays.
-	function followSwitch() {
-		var tucked = !!switcher && switcher.classList.contains('is-tucked') && !button.classList.contains('rpb--done');
-		button.classList.toggle('rpb--tucked', tucked);
-	}
-
-	// Read progress: how much of the post's text has come into view.
+	// Read progress: how much of the post's text has come into view. The button shows once the reader
+	// has scrolled 50 px and stays on screen while they scroll.
 	function update() {
 		waiting = false;
 		placeBelowAdminBar();
 		var box = content.getBoundingClientRect();
 		var read = Math.min(1, Math.max(0, (window.innerHeight - box.top) / box.height));
 		var done = read >= 1;
-		var past = window.scrollY > 50 && (!header || header.getBoundingClientRect().bottom < button.getBoundingClientRect().bottom);
 
-		button.classList.toggle('rpb--visible', past);
+		button.classList.toggle('rpb--visible', window.scrollY > 50);
 		if (done !== button.classList.contains('rpb--done')) {
 			button.classList.toggle('rpb--done', done);
 			icon.setAttribute('d', done ? check : cross);
-			followSwitch();
 		}
 		progress.style.strokeDashoffset = length * (1 - read);
 	}
@@ -66,9 +56,6 @@
 		}
 	}
 
-	if (switcher && window.MutationObserver) {
-		new MutationObserver(followSwitch).observe(switcher, { attributes: true, attributeFilter: ['class'] });
-	}
 	window.addEventListener('scroll', schedule, { passive: true });
 	window.addEventListener('resize', function () {
 		placeAboveBottomMenu();
